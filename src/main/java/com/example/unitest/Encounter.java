@@ -1,6 +1,8 @@
 package com.example.unitest;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Напишите функцию, char[] getFirstEncounteredLetters(String str, int n),
@@ -8,27 +10,39 @@ import java.util.Arrays;
  * будет находиться первый символ, встречающийся в строке str ровно k раз. На вход подаются
  * только английские буквы в нижнем регистре (a - z).
  */
-public class Solution {
+public class Encounter {
     static char[] getFirstEncounteredLetters(String str, int n) {
-        char[] result = new char[n];
-        // заполняем пустыми символами
-        Arrays.fill(result, '\0');
-
-        //Считаем частоты
-        int[] freq = new int[26];
-        for (char c : str.toCharArray()) {
-            freq[c - 'a']++;
+        if (str == null || str.isEmpty() || n <= 0) {
+            throw new IllegalArgumentException("Некорректные входные данные");
         }
 
-        //Проходим строку слева направо
+        //Подсчёт количества вхождений символов
+        Map<Character, Integer> counts = new HashMap<>();
         for (char c : str.toCharArray()) {
-            int count = freq[c - 'a'];
-            if (count >= 1 && count <= n) {
-                int index = count - 1;
-                if (result[index] == '\0') {
-                    result[index] = c;
-                }
+            counts.put(c, counts.getOrDefault(c, 0) + 1);
+        }
+
+        //Результат
+        char[] result = new char[n];
+        //чтобы отметить, что частота уже найдена
+        boolean[] filled = new boolean[n];
+        int filledCount = 0;
+
+        //Проходим строку по порядку — ищем первый символ каждой частоты
+        for (char c : str.toCharArray()) {
+            int freq = counts.get(c);
+            if (freq >= 1 && freq <= n && !filled[freq - 1]) {
+                result[freq - 1] = c;
+                filled[freq - 1] = true;
+                filledCount++;
             }
+            if (filledCount == n) {
+                break;
+            }
+        }
+
+        if (filledCount < n) {
+            throw new IllegalArgumentException("Недостаточно символов для всех частот до " + n);
         }
 
         return result;
